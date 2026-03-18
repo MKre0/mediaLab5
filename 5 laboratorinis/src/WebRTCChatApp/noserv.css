@@ -1,0 +1,358 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+/* ─── RESET & BASE ──────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #0e0f11;
+  --surface:   #161719;
+  --border:    #2a2c30;
+  --border-hi: #3e4147;
+  --text:      #d4d6db;
+  --muted:     #5a5d66;
+  --accent:    #00e5a0;
+  --accent-dim:#00a872;
+  --send:      #0057ff;
+  --send-dim:  #0041c2;
+  --danger:    #ff4060;
+  --mono:      'IBM Plex Mono', 'Courier New', monospace;
+  --sans:      'IBM Plex Sans', sans-serif;
+}
+
+body {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  min-height: 100vh;
+}
+
+/* ─── HEADINGS ──────────────────────────────────────────────────────────── */
+
+h2 {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 3px;
+  background: rgba(0, 229, 160, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h2::before {
+  content: '▶';
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+h3 {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 6px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── STATUS BADGE ──────────────────────────────────────────────────────── */
+
+#status {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  transition: color 0.3s, border-color 0.3s;
+}
+
+/* ─── TEXTAREAS ─────────────────────────────────────────────────────────── */
+
+textarea {
+  display: block;
+  width: 100%;
+  height: 64px;
+  margin: 0 0 4px;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+textarea::placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+textarea:focus {
+  border-color: var(--border-hi);
+}
+
+textarea:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ─── BUTTONS ───────────────────────────────────────────────────────────── */
+
+button {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 2px;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+button:hover {
+  background: var(--accent-dim);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Send button variant */
+#send {
+  background: var(--send);
+  color: #fff;
+  border-radius: 2px;
+}
+
+#send:hover:not(:disabled) {
+  background: var(--send-dim);
+}
+
+/* Capture button */
+#capture {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px;
+  font-size: 10px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  border-radius: 2px;
+}
+
+#capture:hover {
+  background: rgba(0, 229, 160, 0.08);
+  color: var(--accent);
+}
+
+/* ─── VIDEO & IMAGE ─────────────────────────────────────────────────────── */
+
+video, img#receivedImage {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  min-height: 80px;
+  object-fit: cover;
+}
+
+img#receivedImage:not([src]),
+img#receivedImage[src=""] {
+  min-height: 60px;
+  opacity: 0;
+}
+
+/* ─── CHAT ──────────────────────────────────────────────────────────────── */
+
+#chat {
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+#chat-screen-wp {
+  height: 160px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+#chat-screen-wp::-webkit-scrollbar {
+  width: 4px;
+}
+
+#chat-screen-wp::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#chat-screen-wp::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+#chat-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 100%;
+}
+
+/* ─── CHAT MESSAGES ─────────────────────────────────────────────────────── */
+
+div.wrap {
+  clear: both;
+  display: flex;
+  flex-direction: column;
+}
+
+div.me,
+div.other,
+div.info {
+  max-width: 80%;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+div.me {
+  align-self: flex-end;
+  background: rgba(0, 87, 255, 0.14);
+  border: 1px solid rgba(0, 87, 255, 0.3);
+  color: #7ab8ff;
+}
+
+div.other {
+  align-self: flex-start;
+  background: rgba(0, 229, 160, 0.06);
+  border: 1px solid rgba(0, 229, 160, 0.18);
+  color: var(--accent);
+}
+
+div.info {
+  align-self: center;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 2px 0;
+}
+
+span.who {
+  display: none;
+}
+
+span.msg {
+  display: block;
+}
+
+/* ─── CHAT INPUT ROW ────────────────────────────────────────────────────── */
+
+#ct {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+#msg {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#msg:focus {
+  border-color: var(--border-hi);
+}
+
+#msg:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+#msg::placeholder {
+  color: var(--muted);
+}
+
+/* ─── CREATE / JOIN PAGE DISTINCTION ────────────────────────────────────── */
+
+body.create-page h2 {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  background: rgba(0, 229, 160, 0.04);
+}
+
+body.join-page h2 {
+  color: #7ab8ff;
+  border-color: rgba(0, 87, 255, 0.4);
+  background: rgba(0, 87, 255, 0.04);
+}
+
+body.join-page h2::before {
+  content: '◀';
+}

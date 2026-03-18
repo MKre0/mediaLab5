@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>AR Atom Model - Working Sparkles</title>
+    <script src='js/three.js'></script>
+    <script src="jsartoolkit5/artoolkit.min.js"></script>
+    <script src="jsartoolkit5/artoolkit.api.js"></script>
+    <script src="threex/threex-artoolkitsource.js"></script>
+    <script src="threex/threex-artoolkitcontext.js"></script>
+    <script src="threex/threex-arbasecontrols.js"></script>
+    <script src="threex/threex-armarkercontrols.js"></script>
+</head>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+<script>
+var scene, camera, renderer, clock, deltaTime, totalTime = 0;
+var arToolkitSource, arToolkitContext;
+var markerRoot1;
+var atomParts;
+var sparkles; 
+
+initialize();
+animate();
+
+function initialize() {
+    scene = new THREE.Scene();
+
+    let ambientLight = new THREE.AmbientLight( 0xcccccc, 0.5 );
+    scene.add( ambientLight );
+    
+    let pointLight = new THREE.PointLight(0xffffff, 1, 100);
+    pointLight.position.set(0, 5, 5);
+    scene.add(pointLight);
+
+    camera = new THREE.Camera();
+    scene.add(camera);
+
+    renderer = new THREE.WebGLRenderer({
+        antialias : true,
+        alpha: true
+    });
+    renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+    renderer.setSize( 640, 480 );
+    renderer.domElement.style.position = 'absolute'
+    renderer.domElement.style.top = '0px'
+    renderer.domElement.style.left = '0px'
+    document.body.appendChild( renderer.domElement );
+
+    clock = new THREE.Clock();
+    
+    arToolkitSource = new THREEx.ArToolkitSource({ sourceType : 'webcam' });
+
+    function onResize() {
+        arToolkitSource.onResize()  
+        arToolkitSource.copySizeTo(renderer.domElement) 
+        if ( arToolkitContext.arController !== null ) {
+            arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)    
+        }   
+    }
+
+    arToolkitSource.init(function onReady(){ onResize() });
+    window.addEventListener('resize', function(){ onResize() });
+    
+    arToolkitContext = new THREEx.ArToolkitContext({
+        cameraParametersUrl: 'data/camera_para.dat',
+        detectionMode: 'mono'
+    });
+    
+    arToolkitContext.init( function onCompleted(){
+        camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
+    });
+
+    markerRoot1 = new THREE.Group();
+    scene.add(markerRoot1);
+    let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
+        type: 'pattern', patternUrl: "data/hiro.patt",
+    });
+
+    atomParts = buildAtomModel();
+    markerRoot1.add(atomParts.root);
+}
+
+function buildAtomModel() {
+    const root = new THREE.Group();
+    root.scale.set(0.5, 0.5, 0.5);
+
+    // 1. Branduolys
+    const nucleusGroup = new THREE.Group();
+    const nucMat = new THREE.MeshStandardMaterial({ color: 0xff3333, metalness: 0.6, roughness: 0.2 });
+    const nucGeo = new THREE.SphereGeometry(0.25, 16, 16);
+    
+    for(let i=0; i<6; i++) {
+        let p = new THREE.Mesh(nucGeo, nucMat);
+        p.position.set(Math.random()*0.15, Math.random()*0.15, Math.random()*0.15);
+        nucleusGroup.add(p);
+    }
+    root.add(nucleusGroup);
+
+    // 2. Elektronai ir Orbitos
+    const electrons = [];
+    const orbitSpecs = [
+        { radius: 1.2, speed: 2.0, color: 0x00ffff, tiltX: 1.2, tiltZ: 0.5 },
+        { radius: 1.8, speed: 1.5, color: 0xffff00, tiltX: -0.5, tiltZ: 1.1 },
+        { radius: 2.4, speed: 1.0, color: 0xff00ff, tiltX: 0.2, tiltZ: -0.8 }
+    ];
+
+    orbitSpecs.forEach(spec => {
+        const ringGeo = new THREE.TorusGeometry(spec.radius, 0.03, 16, 100);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = spec.tiltX;
+        ring.rotation.z = spec.tiltZ;
+        root.add(ring);
+
+        const eGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        const eMat = new THREE.MeshStandardMaterial({ 
+            color: spec.color, 
+            emissive: spec.color, 
+            emissiveIntensity: 1 
+        });
+        const electron = new THREE.Mesh(eGeo, eMat);
+        
+        electrons.push({
+            mesh: electron,
+            radius: spec.radius,
+            speed: spec.speed,
+            tiltX: spec.tiltX,
+            tiltZ: spec.tiltZ,
+            angle: Math.random() * Math.PI * 2
+        });
+        
+        root.add(electron);
+    });
+
+    // 3. SPARKLES (Pakeistas kūrimo būdas, kad veiktų visose versijose)
+    const sparkleCount = 100;
+    const sparkleGeo = new THREE.Geometry(); // Naudojame paprastą Geometry suderinamumui
+
+    for (var i = 0; i < sparkleCount; i++) {
+        var vertex = new THREE.Vector3();
+        vertex.x = (Math.random() - 0.5) * 6;
+        vertex.y = (Math.random() - 0.5) * 6;
+        vertex.z = (Math.random() - 0.5) * 6;
+        sparkleGeo.vertices.push(vertex);
+    }
+
+    const sparkleMat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.08,
+        transparent: true,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending
+    });
+
+    sparkles = new THREE.Points(sparkleGeo, sparkleMat);
+    root.add(sparkles);
+    
+    return { root, nucleusGroup, electrons };
+}
+
+function update() {
+    if ( arToolkitSource.ready !== false )
+        arToolkitContext.update( arToolkitSource.domElement );
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    deltaTime = clock.getDelta();
+    if (isNaN(deltaTime)) deltaTime = 0; // Saugiklis
+    totalTime += deltaTime;
+
+    if (atomParts) {
+        // Nucleus
+        const nScale = 1 + Math.sin(totalTime * 4) * 0.05;
+        atomParts.nucleusGroup.scale.set(nScale, nScale, nScale);
+        atomParts.nucleusGroup.rotation.y += deltaTime * 0.5;
+
+        // Electrons
+        atomParts.electrons.forEach(e => {
+            e.angle += deltaTime * e.speed;
+            let x = Math.cos(e.angle) * e.radius;
+            let y = Math.sin(e.angle) * e.radius;
+            let pos = new THREE.Vector3(x, y, 0);
+            pos.applyAxisAngle(new THREE.Vector3(1, 0, 0), e.tiltX);
+            pos.applyAxisAngle(new THREE.Vector3(0, 0, 1), e.tiltZ);
+            e.mesh.position.set(pos.x, pos.y, pos.z);
+        });
+
+        // Sparkles animacija
+        if (sparkles) {
+            sparkles.rotation.y += deltaTime * 0.2;
+            sparkles.material.opacity = 0.5 + Math.sin(totalTime * 3) * 0.4;
+        }
+    }
+
+    update();
+    renderer.render( scene, camera );
+}
+</script>
+</body>
+</html>
