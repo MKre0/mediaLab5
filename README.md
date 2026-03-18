@@ -33,4 +33,7 @@ Option B:
   
 The general requirements for option A & B.
   - Test application on at least two browsers and specify in README.md which version and browser it was.
-  - To pass this lab, you have to fully complete an option.  
+  - To pass this lab, you have to fully complete an option.
+# Browsers:
+    -Mozzila Firefox 148.0.2
+    - Microsoft Edge Version 146.0.3856.62
